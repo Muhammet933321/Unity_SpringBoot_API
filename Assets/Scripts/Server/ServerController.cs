@@ -1,9 +1,5 @@
 using SimpleJSON;
 using System.Collections;
-using System.Collections.Generic;
-using TMPro;
-using Unity.VisualScripting;
-using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -15,8 +11,10 @@ public class ServerController : MonoBehaviour
     private string UpdateDataURL = "http://localhost:8080/api/users/update";
     private string addUserURL = "http://localhost:8080/api/users/add";
     private string weaponGetURL = "http://localhost:8080/api/weapons";
+    private string leaderBoardURL= "http://localhost:8080/api/leaderboard";
 
     private string URLTest = "http://localhost:8080/test";
+
 
 
 
@@ -357,7 +355,7 @@ public class ServerController : MonoBehaviour
 
     public IEnumerator GetLeaderboard()
     {
-        using (UnityWebRequest request = UnityWebRequest.Get("http://localhost:8080/api/users/leaderboard"))
+        using (UnityWebRequest request = UnityWebRequest.Get(leaderBoardURL))
         {
             yield return request.SendWebRequest();
 
@@ -370,12 +368,13 @@ public class ServerController : MonoBehaviour
                 string json = request.downloadHandler.text;
                 SimpleJSON.JSONNode users = SimpleJSON.JSONNode.Parse(json);
 
-                for (int i = 0; i< users.Count; i--)
+                for (int i = 0; i< users.Count; i++)
                 {
-                    DataBase.leaderBoard[i,i] = users["username"].ToString();
-                    DataBase.leaderBoard[i, i] = users["level"].ToString();
-                
-                    Debug.Log($"{i}. Username: {DataBase.name}, Level: {DataBase.level}");
+
+                    DataBase.leaderBoard[i, 0] = users[i]["username"];
+                    DataBase.leaderBoard[i, 1] = users[i]["level"];
+
+                    Debug.Log($"{i}. Username: {DataBase.leaderBoard[i, 0]}, Level: {DataBase.leaderBoard[i, 1]}");
                 }
             }
         }

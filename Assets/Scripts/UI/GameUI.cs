@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -13,6 +14,7 @@ public class GameUI : MonoBehaviour
 
     [Header("Scenes")]
     public GameObject mainMenuScene;
+    public GameObject leaderBoardScene;
     public GameObject showDataScene;
     public GameObject updateDataScene;
 
@@ -23,6 +25,12 @@ public class GameUI : MonoBehaviour
     public Text levelTxt;
     public Text gold_amountTxt;
     public Text experience_levelTxt;
+    public Text[] LeaderBoardStatic;
+    public Text[] LeaderBoardNames;
+    public Text[] LeaderBoardLevels;
+    
+
+
 
     [Header("Imput Fields")]
     public TMP_InputField nameInputField;
@@ -40,6 +48,7 @@ public class GameUI : MonoBehaviour
         Server = GameObject.FindGameObjectWithTag("Server");
         serverController = Server.GetComponent<ServerController>();
         StartCoroutine(GetDataAndLoad());
+        StartCoroutine(serverController.GetLeaderboard());
 
     }
     public void DisableAllScene()
@@ -47,6 +56,7 @@ public class GameUI : MonoBehaviour
         mainMenuScene.SetActive(false);
         showDataScene.SetActive(false);
         updateDataScene.SetActive(false);
+        leaderBoardScene.SetActive(false);
     }
     public void ShowDataSceneBtn()
     {
@@ -57,6 +67,13 @@ public class GameUI : MonoBehaviour
     public void PlayBtnClick()
     {
         SceneManager.LoadScene("Game");
+    }
+
+    public void LeaderBoardBtn()
+    {
+        LoadLeaderBoard();
+        DisableAllScene();
+        leaderBoardScene.SetActive(true);
     }
     public void UpdateDataSceneBtn()
     {
@@ -75,7 +92,13 @@ public class GameUI : MonoBehaviour
         yield return StartCoroutine(serverController.GetDataWithName());
         LoadData();
     }
-    public void LoadData()
+
+    private IEnumerator GetLeaderBoardAndLoad()
+    {
+        yield return StartCoroutine(serverController.GetLeaderboard());
+        LoadLeaderBoard();
+    }
+    public void LoadData() // Show User Data
     {
         Debug.Log("Data Loading");
         idTxt.text = DataBase.id;
@@ -91,22 +114,35 @@ public class GameUI : MonoBehaviour
         goldInputField.text = DataBase.gold;
         xpInputField.text = DataBase.xp;
     }
+
     public void LoadLeaderBoard()
     {
         Debug.Log("Leader Board Loading");
-        for (int i = 0; i < DataBase.leaderBoard.Length; i--)
+
+        int lengt; 
+        if (DataBase.leaderBoard.Length < LeaderBoardNames.Length)
         {
-            DataBase.leaderBoard[i, i] = DataBase.leaderBoard[i, i];
-            DataBase.leaderBoard[i, i] = DataBase.leaderBoard[i, i];
-
-            Debug.Log($"{i}. Username: {DataBase.name}, Level: {DataBase.level}");
+            lengt = DataBase.leaderBoard.Length;
         }
-    }
+        else
+        {
+            lengt = LeaderBoardNames.Length;
+        }
+        
 
-    private IEnumerator GetLeaderBoard()
-    {
-        yield return StartCoroutine(serverController.GetLeaderboard());
-        LoadData();
+        for (int i = 0; i < lengt; i++)
+        {
+            LeaderBoardNames[i].text = DataBase.leaderBoard[i, 0];
+            LeaderBoardLevels[i].text = DataBase.leaderBoard[i, 1];
+            if (DataBase.leaderBoard[i, 0] == DataBase.name)
+            {
+                LeaderBoardStatic[i].color = Color.red;
+                LeaderBoardLevels[i].color = Color.red;
+                LeaderBoardNames[i].color = Color.red;
+            }
+            
+            Debug.Log($"{i}. Username: {DataBase.leaderBoard[i, 0]}, Level: {DataBase.leaderBoard[i, 1]}");
+        }
     }
 
     private IEnumerator UpdateDataAndLoad()

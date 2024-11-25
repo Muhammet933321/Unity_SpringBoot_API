@@ -12,7 +12,7 @@ public static class DataBase
 
     public static string errorTXT;
 
-    public static string[,] leaderBoard = new string[5,5];
+    public static string[,] leaderBoard = new string[5,2];
 
     public static Weapon[] weapons;
 
