@@ -9,14 +9,14 @@ EditorBuildSettings:
     path: Assets/Scenes/First.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
+    path: Assets/Scenes/Game.unity
+    guid: c8b05456a552d3445a64a2372b5c6b44
+  - enabled: 1
     path: Assets/Scenes/AuthScene.unity
     guid: ee982dc4af0b4bf4dafde7f7473a6721
   - enabled: 1
     path: Assets/Scenes/GameScene.unity
     guid: 9f9469065eec3e24cb4a05cb3860cd72
-  - enabled: 1
-    path: Assets/Scenes/Game.unity
-    guid: c8b05456a552d3445a64a2372b5c6b44
   - enabled: 1
     path: Assets/Scenes/WebSocketTest.unity
     guid: 8af0ec4b4258d2c4f805ddab55f81744

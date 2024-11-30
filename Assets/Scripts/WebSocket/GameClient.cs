@@ -8,9 +8,13 @@ using SimpleJSON;
 
 public class GameWebSocketClient : MonoBehaviour
 {
+    
     private WebSocket ws;
     private ConcurrentQueue<string> messageQueue = new ConcurrentQueue<string>();
     public GameObject characterPrefab;
+
+    private float sendMassegeOffSet = 0.01f; 
+    private float sedMassegeTimer = 0f;
 
     private Dictionary<string, GameObject> characters = new Dictionary<string, GameObject>();
     private string characterId;
@@ -30,9 +34,44 @@ public class GameWebSocketClient : MonoBehaviour
         Invoke("SendInitialPosition", 1f);
     }
 
+
+
     void Update()
     {
-        if (Input.GetKey(KeyCode.W))
+        sedMassegeTimer += Time.deltaTime;
+
+        if (sedMassegeTimer >= sendMassegeOffSet)
+        {
+            MoveCharacter();
+            sedMassegeTimer = 0f; 
+        }
+
+        while (messageQueue.TryDequeue(out string message))
+        {
+            ProcessServerResponse(message);
+        }
+    }
+
+
+    private void MoveCharacter()
+    {
+        if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.D))
+        {
+            SendInputData("move_forward_right");
+        }
+        else if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.A))
+        {
+            SendInputData("move_forward_left");
+        }
+        else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.D))
+        {
+            SendInputData("move_backward_right");
+        }
+        else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.A))
+        {
+            SendInputData("move_backward_left");
+        }
+        else if (Input.GetKey(KeyCode.W))
         {
             SendInputData("move_forward");
         }
@@ -48,12 +87,9 @@ public class GameWebSocketClient : MonoBehaviour
         {
             SendInputData("move_right");
         }
-
-        while (messageQueue.TryDequeue(out string message))
-        {
-            ProcessServerResponse(message);
-        }
+        
     }
+
 
     void SendInputData(string action)
     {
@@ -108,7 +144,9 @@ public class GameWebSocketClient : MonoBehaviour
                 if (!characters.ContainsKey(id))
                 {
                     GameObject newCharacter = Instantiate(characterPrefab);
+                    newCharacter.AddComponent<CharacterMovement>();
                     characters.Add(id, newCharacter);
+                    
                 }
 
                 Vector3 newPosition = new Vector3(
@@ -117,18 +155,13 @@ public class GameWebSocketClient : MonoBehaviour
                     pos["z"].AsFloat
                 );
 
-                characters[id].transform.position = newPosition;
+                characters[id].GetComponent<CharacterMovement>().targetPosition = newPosition;
 
                 // Eðer gelen ID benim karakterimse, kamerayý bu nesneyi takip ettir
                 if (id == characterId)
                 {
-                    Camera.main.transform.position = new Vector3(
-                        newPosition.x,
-                        newPosition.y + 5f, // Kamerayý biraz yukarý al
-                        newPosition.z - 10f // Kamerayý biraz geriye çek
-                    );
+                    GameObject.FindGameObjectWithTag("MainCamera").GetComponent<FallowCameraSC>().playerOBj = characters[id];
 
-                    Camera.main.transform.LookAt(characters[id].transform);
                 }
             }
         }
